@@ -1,7 +1,7 @@
 ---
 ---
 <div class="mascot-container">
-    <img id="mascot-img" src="/assets/mascot/raccoon-wait-1.png" alt="Mascot" class="mascot-img pixel-art" />
+    <img id="mascot-img" src={`${import.meta.env.BASE_URL}assets/mascot/raccoon-wait-1.png`} alt="Mascot" class="mascot-img pixel-art" />
 </div>
 
 <style>
@@ -91,7 +91,7 @@
         if (state === 'game-over') {
             isOverride = true;
             clearInterval(idleInterval);
-            mascotImg.src = `/assets/mascot/raccoon-game-over.png`;
+            mascotImg.src = `${base}/assets/mascot/raccoon-game-over.png`;
             return;
         }
 
@@ -110,7 +110,7 @@
             
             typingToggle = !typingToggle;
             const idx = typingToggle ? 1 : 2;
-            mascotImg.src = `/assets/mascot/raccoon-typing-${idx}.png`;
+            mascotImg.src = `${base}/assets/mascot/raccoon-typing-${idx}.png`;
             
             // Return to idle after 500ms
             overrideTimeout = setTimeout(() => {
