@@ -1,0 +1,396 @@
+---
+---
+<section id="advent-section">
+    <div class="header-row">
+        <h2 class="section-title">PREMIOS🎄</h2>
+        <div class="points-display">
+            PUNTOS: <span id="calendar-points">0</span>
+        </div>
+    </div>
+    
+    <div class="grid">
+        {Array.from({length: 6}).map((_, i) => {
+            // Deterministic cost based on day for now, or random? User asked random.
+            // Server-side random generation in Astro frontmatter works for build time, 
+            // but for dynamic checking we might need client logic reading data attrs.
+            const baseCost = 100;
+            const randomAdd = Math.floor(Math.random() * 5) * 50; // 0, 50, 100, 150, 200
+            const cost = baseCost + randomAdd; 
+            
+            return (
+                <div class="calendar-card" id={`day-${i+1}`} data-day={i+1} data-cost={cost}>
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <span class="day-number">{i+1}</span>
+                        </div>
+                        <div class="card-back">
+                            <span class="reward">🎁</span>
+                        </div>
+                    </div>
+                    <div class="lock-overlay">
+                        <span class="lock-icon">🔒</span>
+                        <span class="cost-tag">{cost} pts</span>
+                    </div>
+                </div>
+            )
+        })}
+    </div>
+</section>
+
+<style>
+    #advent-section {
+        width: 100%;
+        max-width: 1200px;
+        margin: 4rem auto;
+        padding: 2rem;
+        background: rgba(0,0,0,0.2);
+        border-radius: 20px;
+        border: 4px solid var(--color-secondary);
+    }
+
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        padding: 0 2rem;
+    }
+
+    .section-title {
+        color: var(--color-gold);
+        text-shadow: 4px 4px 0 #000;
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .points-display {
+        font-size: 1.5rem;
+        color: var(--color-correct);
+        border: 2px solid #fff;
+        padding: 10px 20px;
+        background: rgba(0,0,0,0.5);
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 2rem;
+    }
+
+    .calendar-card {
+        aspect-ratio: 3/4;
+        background: var(--color-primary);
+        border: 4px solid #000;
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.2s;
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+    }
+
+    .calendar-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .calendar-card.unlocked {
+        background: var(--color-secondary);
+        border-color: var(--color-gold);
+        cursor: default;
+    }
+
+    .card-inner {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .calendar-card.unlocked .card-inner .card-front {
+        display: none;
+    }
+    .calendar-card.unlocked .card-inner .card-back {
+        display: block; /* Or flex centered */
+    }
+    .card-back { display: none; font-size: 3rem; }
+
+    .day-number {
+        font-size: 2rem;
+        color: var(--color-snow);
+        text-shadow: 2px 2px 0 #000;
+    }
+
+    .decoration {
+        font-size: 1.5rem;
+        margin-top: 10px;
+    }
+
+    .lock-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+        transition: opacity 0.3s;
+    }
+    
+    .cost-tag {
+        font-size: 0.8rem;
+        color: var(--color-gold);
+        margin-top: 10px;
+        background: #000;
+        padding: 5px 10px;
+    }
+    
+    /* Unlocked State */
+    .calendar-card.unlocked .lock-overlay {
+        display: none;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 200;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(4px);
+    }
+    
+    .modal-overlay.active {
+        display: flex;
+    }
+    
+    .gift-card-modal {
+        background: #fdfbf7; /* Parchmentish */
+        width: 90%;
+        max-width: 500px;
+        min-height: 400px;
+        padding: 2rem;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 50px rgba(189, 142, 87, 0.2);
+        border-radius: 5px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #d4c5a9;
+        transform: rotate(-1deg);
+    }
+    
+    .gift-card-modal::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 30px;
+        background: rgba(200, 50, 50, 0.8); /* Tape */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .card-text-display {
+        flex-grow: 1;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-family: 'Courier New', Courier, monospace; /* Or a cursive font if imported */
+        font-size: 1.4rem;
+        font-weight: bold;
+        line-height: 1.6;
+        color: #333;
+        padding: 20px;
+        overflow-y: auto;
+    }
+    
+    .close-hint {
+        text-align: center;
+        font-size: 0.8rem;
+        color: #999;
+        margin-top: 10px;
+        font-style: italic;
+    }
+    
+    @media (max-width: 768px) {
+        #advent-section {
+            padding: 1rem;
+            margin: 2rem auto;
+        }
+
+        .header-row {
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        .points-display {
+            font-size: 1rem;
+            padding: 5px 10px;
+        }
+        
+        .grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Smaller cards */
+            gap: 1rem;
+        }
+        
+        .day-number {
+             font-size: 1.5rem;
+        }
+        
+        .gift-card-modal {
+            width: 95%;
+            padding: 1rem;
+            min-height: 300px;
+        }
+        
+        .card-text-display {
+            font-size: 1rem;
+            padding: 10px;
+        }
+    }
+</style>
+
+<!-- Gift Card Modal -->
+<div id="gift-modal" class="modal-overlay">
+    <div class="gift-card-modal" id="gift-card-content">
+        <!-- Title Removed per request -->
+        <!-- <h3 id="card-title" class="card-title">DAY 1</h3> -->
+        <div id="card-text" class="card-text-display">...</div>
+        <div class="close-hint">Haz click fuera para cerrar</div>
+    </div>
+</div>
+
+<script>
+    // State
+    const cards = document.querySelectorAll('.calendar-card');
+    const pointsDisplay = document.getElementById('calendar-points');
+    const modal = document.getElementById('gift-modal');
+    const cardText = document.getElementById('card-text');
+    
+    // Dedications 1-10
+    const DEDICATIONS = [
+        "Te quiero mucho ❤️",
+        "Siempre en mi corazón 37.884962, -4.783206",
+        "Tus ojos y tu sonrisa iluminan mi alma Mapache",
+        "Nunca dudes de ti misma ni de tu esfuerzo, sabes que tienes mucho potencial y eres capaz de todo ❤️",
+        "我爱你 ❤️",
+        "Me tienes para lo que necesites.",
+        "Gracias por lo bonita que eres y todo lo bonito que me has dado."
+    ];
+    
+    const STORAGE_KEY = 'raccoon_total_score'; 
+    const UNLOCKS_KEY = 'raccoon_unlocks';
+    
+    let unlocks = [];
+    try {
+        unlocks = JSON.parse(localStorage.getItem(UNLOCKS_KEY) || '[]');
+    } catch(e) {}
+    
+    let currentDayOpening = null;
+
+    function updateDisplay(score) {
+        if(pointsDisplay) pointsDisplay.textContent = score;
+        
+        cards.forEach(card => {
+            const day = parseInt(card.dataset.day);
+            if(unlocks.includes(day)) {
+                card.classList.add('unlocked');
+                const overlay = card.querySelector('.lock-overlay');
+                if(overlay) overlay.style.display = 'none'; 
+            }
+        });
+    }
+
+    // Modal Logic
+    function openCard(day) {
+        currentDayOpening = day;
+        if(modal) modal.classList.add('active');
+        
+        // Load Text from List (1-indexed day maps to 0-indexed array)
+        if(cardText) {
+            const text = DEDICATIONS[day - 1] || "¡Feliz Navidad!";
+            cardText.textContent = text;
+        }
+    }
+    
+    function closeCard() {
+        if (!modal.classList.contains('active')) return;
+        modal.classList.remove('active');
+        currentDayOpening = null;
+    }
+    
+    // Interactions
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const day = parseInt(card.dataset.day);
+            const cost = parseInt(card.dataset.cost);
+            
+            if (unlocks.includes(day)) {
+                // Open Modal
+                openCard(day);
+                return;
+            }
+
+            // Check points from display DOM as source of truth for now? 
+            // Or wait for an authoritative source. 
+            // Index.astro holds the game.totalScore. 
+            // We can read the DOM for current points since it's updated via event.
+            const currentPoints = parseInt(pointsDisplay ? pointsDisplay.textContent : '0');
+
+            if (currentPoints >= cost) {
+                if(confirm(`Desbloquear Premio ${day} por ${cost} puntos?`)) {
+                    // Signal Index to deduct
+                    document.dispatchEvent(new CustomEvent('spend-points', { detail: { cost: cost } }));
+                    
+                    // Optimistic update
+                    unlocks.push(day);
+                    localStorage.setItem(UNLOCKS_KEY, JSON.stringify(unlocks));
+                    
+                    card.classList.add('unlocked');
+                    const overlay = card.querySelector('.lock-overlay');
+                    if(overlay) overlay.style.display = 'none';
+                    
+                    // Confetti?
+                }
+            } else {
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 500);
+            }
+        });
+    });
+    
+    // Close Modal Events
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeCard();
+            }
+        });
+    }
+    
+    // Load state
+    updateDisplay(parseInt(localStorage.getItem(STORAGE_KEY) || '0'));
+    
+    // Listen for score updates from GameEngine
+    document.addEventListener('score-updated', (e) => {
+        const newScore = e.detail.totalScore;
+        updateDisplay(newScore);
+    });
+</script>

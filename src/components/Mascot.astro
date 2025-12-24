@@ -1,0 +1,138 @@
+---
+---
+<div class="mascot-container">
+    <img id="mascot-img" src="/assets/mascot/raccoon-wait-1.png" alt="Mascot" class="mascot-img pixel-art" />
+</div>
+
+<style>
+    .mascot-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .mascot-img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        transition: transform 0.1s;
+    }
+    
+    .shake {
+        animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+</style>
+
+<script>
+    // Config
+    const CONFIG = {
+        typingCount: 2, 
+        waitCount: 3,
+        errorCount: 2,   
+    };
+
+    const mascotImg = document.getElementById('mascot-img');
+    let typingToggle = false;
+    let currentMood = 'neutral'; // 'neutral' | 'stress'
+    let isOverride = false; // true if typing/error/game-over is active
+    let overrideTimeout;
+    let idleInterval;
+
+    // Helper: Set Random Image
+    function setRandomImage(prefix, count) {
+        if(!mascotImg) return;
+        const rand = Math.floor(Math.random() * count) + 1;
+        mascotImg.src = `/assets/mascot/${prefix}-${rand}.png`;
+    }
+
+    // The Idle Loop (runs constantly)
+    function startIdleLoop() {
+        if (idleInterval) clearInterval(idleInterval);
+        
+        // Initial call
+        if (!isOverride) runIdleFrame();
+
+        idleInterval = setInterval(() => {
+            if (!isOverride) {
+                runIdleFrame();
+            }
+        }, 450);
+    }
+
+    function runIdleFrame() {
+        if (currentMood === 'stress') {
+            setRandomImage('raccoon-no-time', CONFIG.errorCount);
+        } else {
+            setRandomImage('raccoon-wait', CONFIG.waitCount);
+        }
+    }
+
+    // Event Handler
+    document.addEventListener('game:mascot-update', (e) => {
+        const { state, mood } = e.detail;
+        
+        if (!mascotImg) return;
+
+        // mood update (persistent)
+        if (mood) {
+            currentMood = mood;
+            // update immediately if idle
+            if (!isOverride) runIdleFrame();
+            return;
+        }
+
+        // Action updates
+        if (state === 'game-over') {
+            isOverride = true;
+            clearInterval(idleInterval);
+            mascotImg.src = `/assets/mascot/raccoon-game-over.png`;
+            return;
+        }
+
+        if (state === 'reset') {
+            isOverride = false;
+            currentMood = 'neutral';
+            if(overrideTimeout) clearTimeout(overrideTimeout);
+            startIdleLoop();
+            return;
+        }
+
+        if (state === 'typing') {
+            // "alternating typing"
+            isOverride = true;
+            if (overrideTimeout) clearTimeout(overrideTimeout);
+            
+            typingToggle = !typingToggle;
+            const idx = typingToggle ? 1 : 2;
+            mascotImg.src = `/assets/mascot/raccoon-typing-${idx}.png`;
+            
+            // Return to idle after 500ms
+            overrideTimeout = setTimeout(() => {
+                isOverride = false;
+                runIdleFrame();
+            }, 500);
+            
+        } else if (state === 'error') {
+            isOverride = true;
+            if (overrideTimeout) clearTimeout(overrideTimeout);
+            
+            setRandomImage('raccoon-no-time', CONFIG.errorCount);
+            mascotImg.classList.add('shake');
+            
+            overrideTimeout = setTimeout(() => {
+                mascotImg.classList.remove('shake');
+                isOverride = false;
+                runIdleFrame();
+            }, 500);
+        }
+    });
+
+    // Start loop
+    startIdleLoop();
+
+</script>
