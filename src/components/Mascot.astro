@@ -42,12 +42,13 @@
     let isOverride = false; // true if typing/error/game-over is active
     let overrideTimeout;
     let idleInterval;
+    const base = import.meta.env.BASE_URL;
 
     // Helper: Set Random Image
     function setRandomImage(prefix, count) {
         if(!mascotImg) return;
         const rand = Math.floor(Math.random() * count) + 1;
-        mascotImg.src = `/assets/mascot/${prefix}-${rand}.png`;
+        mascotImg.src = `${base}/assets/mascot/${prefix}-${rand}.png`;
     }
 
     // The Idle Loop (runs constantly)
