@@ -1,0 +1,101 @@
+---
+---
+<div id="typing-container">
+    <div id="word-display" class="word-display">START</div>
+    
+    <div class="input-wrapper">
+        <div id="visual-input" class="visual-input"></div>
+        <input type="text" id="hidden-input" autocomplete="off" />
+    </div>
+</div>
+
+<style>
+    #typing-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .word-display {
+        font-size: 3rem;
+        letter-spacing: 0.5rem;
+        margin-bottom: 1.5rem;
+        text-shadow: 4px 4px 0px #000;
+        min-height: 4rem;
+        user-select: none;
+        color: var(--color-snow);
+        text-align: center;
+    }
+
+    .char {
+        display: inline-block;
+        transition: transform 0.1s;
+    }
+
+    .char.correct {
+        color: var(--color-correct);
+        text-shadow: 0 0 10px var(--color-gold);
+        transform: translateY(-2px);
+    }
+
+    .char.wrong {
+        color: var(--color-wrong);
+    }
+
+    .input-wrapper {
+        position: relative;
+        width: 300px;
+        height: 50px;
+    }
+
+    .visual-input {
+        width: 100%;
+        height: 100%;
+        border: 4px solid #000;
+        background: rgba(0,0,0,0.5);
+        color: var(--color-gold);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+
+    #hidden-input {
+        position: absolute;
+        opacity: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: text;
+    }
+</style>
+
+<script>
+    const visualInput = document.getElementById('visual-input');
+    const hiddenInput = document.getElementById('hidden-input');
+
+    hiddenInput.addEventListener('input', (e) => {
+        // Visual feedback inside the box (last typed char or placeholder)
+        // Actually, since the game engine clears the input logic, 
+        // we might want to mirror what's being typed here if we want strictly 1:1
+        // But the game engine clears buffer on valid words usually?
+        // Let's just create a blinking cursor effect or show the current char momentarily
+        
+        // For this iteration, let's keep it simple: The visual input box is mostly a focus target.
+        // Maybe we flash the border color?
+        visualInput.style.borderColor = 'var(--color-gold)';
+        setTimeout(() => visualInput.style.borderColor = '#000', 100);
+    });
+
+    hiddenInput.addEventListener('blur', () => {
+        visualInput.style.opacity = '0.5';
+    });
+    
+    hiddenInput.addEventListener('focus', () => {
+        visualInput.style.opacity = '1';
+    });
+</script>

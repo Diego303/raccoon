@@ -1,0 +1,641 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TypingArea from '../components/TypingArea.astro';
+import Mascot from '../components/Mascot.astro';
+import HUD from '../components/HUD.astro';
+import AdventCalendar from '../components/AdventCalendar.astro';
+import '../styles/global.css';
+---
+
+<Layout title="Christmas Typing Game">
+	<main>
+        <!-- Game Section -->
+        <section class="game-board">
+            <h1 class="game-title">🎅MAPACHE ESQUIZOFRENICO NAVIDEÑO</h1>
+            
+            <div class="hud-container">
+                <HUD />
+            </div>
+
+            <div class="play-area">
+                <div class="center-stage">
+                    <TypingArea />
+                    <button id="surrender-btn" class="danger-btn">RENDIRSE</button>
+                </div>
+                
+                <div class="mascot-stage">
+                    <Mascot />
+                </div>
+            </div>
+            
+            <!-- Screens -->
+            <div id="start-screen" class="screen">
+                <h2>ELIGE TU MODO</h2>
+                <div class="mode-buttons">
+                    <button id="btn-mode-normal" class="mode-btn">
+                        NORMAL
+                        <span class="sub">10 Rounds • Survival</span>
+                    </button>
+                    <button id="btn-mode-zen" class="mode-btn">
+                        ZEN
+                        <span class="sub">No Timer • Relax</span>
+                    </button>
+                    <button id="btn-mode-chaos" class="mode-btn glitch-text">
+                        CHAOS
+                        <span class="sub">Hardcore • Glitches</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="game-over-screen" class="screen hidden">
+                <h2>GAME OVER</h2>
+                <p>SCORE: <span id="final-score">0</span></p>
+                <p style="font-size: 0.8rem; margin-top: 5px;">TOTAL: <span id="game-over-total">0</span></p>
+                <button id="restart-btn">JUGAR DE NUEVO</button>
+                <button id="menu-btn" style="margin-top: 10px; border-color: var(--color-snow); color: var(--color-snow);">MENU</button>
+                <button id="scroll-calendar-btn" style="margin-top: 10px; background: var(--color-correct);">ABRIR PREMIOS</button>
+            </div>
+            
+            <div id="win-screen" class="screen hidden" style="background: rgba(0, 100, 0, 0.6);">
+                <h2 style="color: #ffff00; font-size: 3rem;">YOU SAVED CHRISTMAS!</h2>
+                <p>FINAL SCORE: <span id="win-score">0</span></p>
+                <button id="win-restart-btn">JUGAR DE NUEVO</button>
+                <button id="win-menu-btn" style="margin-top: 10px; border-color: var(--color-snow); color: var(--color-snow);">MENU</button>
+            </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <AdventCalendar />
+	</main>
+</Layout>
+
+</Layout>
+
+<style is:global>
+    :root {
+        --color-bg: #0f380f;
+        --color-crm: #f0f0d8;
+        --color-gold: #e6c229;
+        --color-red: #d10000;
+        --color-green: #007500;
+        
+        --color-correct: #4cd137;
+        --color-wrong: #e84118;
+        --color-snow: #fffafa;
+    }
+
+    /* Global Body Transitions & Themes */
+    body {
+        background-color: var(--color-bg);
+        color: var(--color-crm);
+        transition: background-color 1.5s ease;
+        margin: 0; 
+        font-family: 'Press Start 2P', cursive; /* Ensure font is global */
+    }
+
+    body.theme-zen {
+        background-color: #2c3e50 !important; /* Calm Blue */
+    }
+
+    body.theme-chaos {
+        background-color: #6d0808 !important; /* Dark Red */
+    }
+    
+    * {
+        box-sizing: border-box;
+    }
+</style>
+
+<style>
+	main {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+        min-height: 100vh;
+        width: 100%;
+        padding-bottom: 50px;
+	}
+
+    .game-board {
+        width: 100%;
+        max-width: 1000px;
+        min-height: 80vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding-top: 2rem;
+    }
+
+    .game-title {
+        text-align: center;
+        color: var(--color-snow);
+        text-shadow: 4px 4px 0 var(--color-primary);
+        margin: 0;
+        margin-bottom: 2rem;
+    }
+    
+    .hud-container {
+        width: 100%;
+        margin-bottom: 3rem;
+        z-index: 10;
+    }
+
+    .play-area {
+        display: flex;
+        flex-direction: row;
+        align-items: center; /* Vertical align */
+        justify-content: space-between;
+        flex-grow: 1;
+        padding: 0 2rem;
+    }
+
+    .center-stage {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .mascot-stage {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        /* Clean style for PNGs */
+        min-height: 250px;
+        align-items: center;
+    }
+
+    .screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* More transparent as requested */
+        background: rgba(0,0,0,0.3); 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        backdrop-filter: blur(2px);
+        border-radius: 20px; 
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .mode-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .mode-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        font-family: inherit;
+        background: #000;
+        border: 2px solid var(--color-gold);
+        color: var(--color-gold);
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    
+    .mode-btn:hover {
+        background: var(--color-gold);
+        color: #000;
+    }
+    
+    .danger-btn {
+        margin-top: 20px;
+        background: transparent;
+        border: 2px solid var(--color-wrong);
+        color: var(--color-wrong);
+        font-family: inherit;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: 0.2s;
+    }
+    
+    .danger-btn:hover {
+        background: var(--color-wrong);
+        color: #fff;
+    }
+    
+    .mode-btn .sub {
+        font-size: 0.7rem;
+        opacity: 0.8;
+        margin-top: 5px;
+    }
+
+    /* Combo Popups */
+    .combo-popup {
+        position: absolute;
+        font-family: 'Press Start 2P', cursive;
+        font-size: 1.5rem;
+        color: #fff;
+        text-shadow: 3px 3px 0 #000;
+        pointer-events: none;
+        z-index: 100;
+        animation: combo-float 1s ease-out forwards;
+        white-space: nowrap;
+    }
+    
+    .combo-word {
+        color: var(--color-gold);
+        font-size: 0.8em;
+        display: block;
+        text-align: center;
+        margin-top: 5px;
+    }
+    
+    @keyframes combo-float {
+        0% { transform: scale(0.5) translateY(0); opacity: 0; }
+        20% { transform: scale(1.2) translateY(-10px); opacity: 1; }
+        100% { transform: scale(1) translateY(-50px); opacity: 0; }
+    }
+    
+    /* Random positions relative to game-board */
+    /* Assuming game-board is relative (it should be) */
+    .pos-1 { left: 10%; top: 40%; transform: rotate(-15deg); }
+    .pos-2 { right: 10%; top: 40%; transform: rotate(15deg); }
+    .pos-3 { left: 20%; top: 60%; transform: rotate(-5deg); }
+    .pos-4 { right: 20%; top: 60%; transform: rotate(5deg); }
+    .pos-5 { left: 50%; top: 30%; transform: translateX(-50%) rotate(0deg); }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .game-title {
+            font-size: 1.5rem; /* Smaller title */
+            margin-bottom: 1rem;
+            padding: 0 10px;
+        }
+
+        .hud-container {
+            margin-bottom: 1rem;
+        }
+
+        .play-area {
+            flex-direction: column; /* Stack vertically */
+            padding: 0 10px;
+            width: 100%;
+        }
+
+        .center-stage {
+            order: 2; /* Input below mascot? Or above? Let's try Input Below (2) */
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .mascot-stage {
+            order: 1;
+            width: 100%;
+            min-height: 150px; /* Reduced specific height */
+        }
+        
+        .mascot-stage :global(img) {
+            max-height: 180px; /* Limit mascot size */
+            width: auto;
+        }
+
+        /* Adjust positions for combos on mobile */
+        .pos-1 { left: 5%; top: 20%; }
+        .pos-2 { right: 5%; top: 20%; }
+        .pos-3 { left: 5%; top: 50%; }
+        .pos-4 { right: 5%; top: 50%; }
+    }
+</style>
+
+<script>
+    import { GameEngine } from '../scripts/game-engine.js';
+
+    const game = new GameEngine();
+    
+    // Elements
+    const wordDisplay = document.getElementById('word-display');
+    const inputField = document.getElementById('hidden-input'); 
+    const scoreVal = document.getElementById('score-val');
+    const timerBar = document.getElementById('timer-bar');
+    const roundBar = document.getElementById('round-bar');
+    const roundVal = document.getElementById('round-val');
+    const modeVal = document.getElementById('mode-val');
+    
+    // Screens
+    const startScreen = document.getElementById('start-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const winScreen = document.getElementById('win-screen'); // Logic to add this if missing in HTML
+    
+    const finalScore = document.getElementById('final-score');
+    
+    // Buttons
+    // Mode Buttons
+    const btnNormal = document.getElementById('btn-mode-normal');
+    const btnZen = document.getElementById('btn-mode-zen');
+    const btnChaos = document.getElementById('btn-mode-chaos');
+    
+    const restartBtn = document.getElementById('restart-btn');
+    const menuBtn = document.getElementById('menu-btn');
+    const winRestartBtn = document.getElementById('win-restart-btn');
+    const winMenuBtn = document.getElementById('win-menu-btn');
+    const scrollCalendarBtn = document.getElementById('scroll-calendar-btn');
+    const surrenderBtn = document.getElementById('surrender-btn');
+
+    // Init
+    game.init();
+
+    // Mode Selection Handlers
+    function startGame(mode) {
+        startScreen.classList.add('hidden');
+        if(winScreen) winScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        
+        // Theme Logic
+        document.body.classList.remove('theme-zen', 'theme-chaos');
+        if (mode === 'zen') {
+            document.body.classList.add('theme-zen');
+        } else if (mode === 'chaos') {
+            document.body.classList.add('theme-chaos');
+        }
+        
+        inputField.focus();
+        // Reset mascot
+        document.dispatchEvent(new CustomEvent('game:mascot-update', { detail: { state: 'reset' } }));
+        lastCombo = 0;
+        
+        game.startGame(mode);
+    }
+    
+    function showMainMenu() {
+        if(winScreen) winScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+        
+        // Reset Theme
+        document.body.classList.remove('theme-zen', 'theme-chaos');
+        
+        game.resetGame('normal'); // Stop game logic
+        document.dispatchEvent(new CustomEvent('game:mascot-update', { detail: { state: 'reset' } }));
+        lastCombo = 0;
+    }
+
+    if(btnNormal) btnNormal.addEventListener('click', () => startGame('normal'));
+    if(btnZen) btnZen.addEventListener('click', () => startGame('zen'));
+    if(btnChaos) btnChaos.addEventListener('click', () => startGame('chaos'));
+
+    // Restarts handling
+    const handleRestart = () => {
+        lastCombo = 0;
+        startGame(game.mode);
+    };
+
+    if(restartBtn) restartBtn.addEventListener('click', handleRestart);
+    if(winRestartBtn) winRestartBtn.addEventListener('click', handleRestart);
+    
+    // Menu handling
+    if(menuBtn) menuBtn.addEventListener('click', showMainMenu);
+    if(winMenuBtn) winMenuBtn.addEventListener('click', showMainMenu);
+    
+    if(surrenderBtn) surrenderBtn.addEventListener('click', () => {
+        if(game.isPlaying) {
+             game.gameOver();
+        }
+    });
+    
+    // Calendar
+    scrollCalendarBtn.addEventListener('click', () => {
+        document.getElementById('advent-section').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Make sure input is focusable but respect explicit clicks elsewhere
+    document.addEventListener('keydown', (e) => {
+        if (game.isPlaying && !inputField.matches(':focus')) {
+            // Optional: Auto focus back to input if user starts typing?
+            inputField.focus();
+        }
+    });
+
+    inputField.addEventListener('input', (e) => {
+        // Max Length 12 Enforced Visually
+        if (inputField.value.length > 12) {
+            inputField.value = inputField.value.slice(0, 12);
+        }
+        
+        const currentText = inputField.value;
+        const result = game.validateInput(currentText);
+        
+        // Sync visual input text
+        const visualInput = document.getElementById('visual-input');
+        if (visualInput) {
+             visualInput.textContent = currentText;
+        }
+
+        // Logic from engine
+        if (result && result.action === 'clear') {
+            inputField.value = "";
+            if (visualInput) visualInput.textContent = "";
+        }
+    });
+
+    // Engine Events
+    game.on('new-word', ({ word }) => {
+        wordDisplay.innerHTML = "";
+        word.split('').forEach(char => {
+            const span = document.createElement('span');
+            span.className = 'char';
+            span.textContent = char;
+            wordDisplay.appendChild(span);
+        });
+        // Clear input on new word just in case
+        inputField.value = "";
+        const visualInput = document.getElementById('visual-input'); 
+        if(visualInput) visualInput.textContent = "";
+    });
+
+    // Engine Events
+    game.on('input-check', ({ matchLength, isError, errorIndex, inputLength }) => {
+        const visualInput = document.getElementById('visual-input');
+        
+        if (visualInput) {
+            visualInput.innerHTML = "";
+            const currentText = inputField.value;
+            for(let i=0; i<currentText.length; i++) {
+                const s = document.createElement('span');
+                s.textContent = currentText[i];
+                s.style.color = 'var(--color-gold)'; // Default
+                
+                if (i < matchLength) {
+                    s.style.color = 'var(--color-correct)'; // Green
+                } else if (isError && i === errorIndex) {
+                    s.style.color = 'var(--color-wrong)'; // Red
+                }
+                visualInput.appendChild(s);
+            }
+        }
+        
+        const spans = wordDisplay.querySelectorAll('.char');
+        spans.forEach((span, i) => {
+            span.className = 'char'; 
+            if (i < matchLength) {
+                span.classList.add('correct');
+            } else if (isError && i === errorIndex) {
+                 span.classList.add('wrong');
+            }
+        });
+        
+        if (isError) {
+             wordDisplay.classList.add('shake');
+             setTimeout(() => wordDisplay.classList.remove('shake'), 200);
+        }
+    });
+
+    // Combo Logic
+    let lastCombo = 0;
+    const praiseWords = ["MAS NEGRO!", "DELEGUEN!", "POR EL CULO!", "RAPIDO!", "AYUDA POLICIA!", "GUAU GUAU!", "PUTA DIGO MIAU!", "POLLA GORDA BUSCAME!", "AYUDA PAPA NOEL!", "COMO AVANZA LA IA", "A TI HAY QUE APUNTARTE A UN CURSO DE INFORMATICA!"];
+    
+    function showComboPopup(value) {
+        // Random Position
+        const positions = ['pos-1', 'pos-2', 'pos-3', 'pos-4', 'pos-5'];
+        const randomPos = positions[Math.floor(Math.random() * positions.length)];
+        const randomWord = praiseWords[Math.floor(Math.random() * praiseWords.length)];
+        
+        const popup = document.createElement('div');
+        popup.className = `combo-popup ${randomPos}`;
+        
+        // HTML Content
+        popup.innerHTML = `
+            <div>COMBO x${value}</div>
+            <div class="combo-word">${randomWord}</div>
+        `;
+        
+        // Append to absolute container (game-board)
+        // Ensure game-board has position: relative or is screen level. 
+        // Using body might be safer for absolute positioning if board clips.
+        // Let's rely on game-board being the container.
+        const board = document.querySelector('.game-board');
+        if(board) board.appendChild(popup);
+        
+        // Cleanup
+        setTimeout(() => {
+            if(popup.parentNode) popup.parentNode.removeChild(popup);
+        }, 1200);
+    }
+
+    game.on('update-hud', (state) => {
+        if(scoreVal) scoreVal.textContent = state.score;
+        // if(comboVal) comboVal.textContent = `x${state.combo}`; // Removed per request
+        
+        // Dynamic Combo Check
+        if (state.combo > lastCombo && state.combo >= 2) {
+             showComboPopup(state.combo);
+        }
+        lastCombo = state.combo;
+        
+        const totalScoreEl = document.getElementById('total-score-val');
+        if(totalScoreEl) totalScoreEl.textContent = state.totalScore;
+        
+        // Round Info
+        const roundBox = document.getElementById('round-stat-box');
+        const modeBox = document.getElementById('mode-display');
+        
+        if (state.mode === 'normal') {
+            if(roundBox) roundBox.style.display = 'flex';
+            if(modeBox) modeBox.style.display = 'none';
+            if(roundVal) roundVal.textContent = `${state.round}/${state.totalRounds}`;
+        } else {
+            if(roundBox) roundBox.style.display = 'none';
+            if(modeBox) modeBox.style.display = 'flex';
+            if(modeVal) modeVal.textContent = state.mode.toUpperCase();
+        }
+        
+        // Sync Calendar
+        document.dispatchEvent(new CustomEvent('score-updated', { detail: { totalScore: state.totalScore } }));
+    });
+    
+    game.on('game-win', ({ score, totalScore }) => {
+        if (!winScreen) return; // robustness
+        
+        const winScore = document.getElementById('win-score');
+        if(winScore) winScore.textContent = score;
+        
+        winScreen.classList.remove('hidden');
+        document.dispatchEvent(new CustomEvent('game:mascot-update', { detail: { state: 'typing' } })); // Happy mascot!
+    });
+    
+    game.on('game-over', ({ score, totalScore }) => {
+        finalScore.textContent = score;
+        const totalScoreEl = document.getElementById('game-over-total');
+        if(totalScoreEl) totalScoreEl.textContent = totalScore;
+        
+        // Reset Theme on Game Over
+        document.body.classList.remove('theme-zen', 'theme-chaos');
+        
+        gameOverScreen.classList.remove('hidden');
+        document.dispatchEvent(new CustomEvent('game:mascot-update', { detail: { state: 'game-over' } }));
+    });
+    
+    // Monitor time
+    game.on('update-timer', ({ time, max, roundProgress }) => {
+        // Survival Bar (Main Timer)
+        if(timerBar) {
+            if (game.mode === 'zen') {
+                timerBar.style.width = '100%';
+                timerBar.classList.remove('low');
+            } else {
+                const pct = (time / max) * 100;
+                timerBar.style.width = `${pct}%`;
+                
+                if (pct < 30) {
+                    timerBar.classList.add('low');
+                } else {
+                    timerBar.classList.remove('low');
+                }
+                
+                // Mood logic
+                const newMood = pct <= 25 ? 'stress' : 'neutral';
+                if (newMood !== currentMascotMood) {
+                    currentMascotMood = newMood;
+                    document.dispatchEvent(new CustomEvent('game:mascot-update', { detail: { mood: newMood } }));
+                }
+            }
+        }
+        
+        // Round Progress Bar (Normal Mode only)
+        const roundContainer = document.getElementById('round-progress-container');
+        if (game.mode === 'normal') {
+            if(roundContainer) roundContainer.style.display = 'block';
+            if(roundBar) roundBar.style.width = `${roundProgress}%`;
+        } else {
+            if(roundContainer) roundContainer.style.display = 'none';
+        }
+    });
+    
+    // Calendar Points Logic
+    document.addEventListener('spend-points', (e) => {
+        const { cost } = e.detail;
+        if (game) {
+            game.totalScore = Math.max(0, game.totalScore - cost);
+            // Update HUD immediately
+            document.dispatchEvent(new CustomEvent('score-updated', { detail: { totalScore: game.totalScore } }));
+            // Also update internal HUD state if we want visual consistency immediately
+            game.emit('update-hud', game.getHUDState());
+        }
+    });
+
+    // Explicit errors trigger no-time asset immediately
+    game.on('mascot-error', () => {
+         document.dispatchEvent(new CustomEvent('game:mascot-update', { detail: { state: 'error' } }));
+    });
+    
+    game.on('mascot-typing', () => {
+         document.dispatchEvent(new CustomEvent('game:mascot-update', { detail: { state: 'typing' } }));
+    });
+
+</script>
